@@ -1,0 +1,9 @@
+notes.txt
+AHK-Studio Backup/*
+data/*
+logs/*
+lib/AHK-Studio Backup/*
+lib/plugin/AHK-Studio Backup/*
+Vibrancer/*
+msvcr100.dll
+debug.log
