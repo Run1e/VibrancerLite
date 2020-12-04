@@ -9,7 +9,7 @@ m(x*) {
 
 p(x*) {
 	static First := true ; haha hackety fuckin hack
-	Debug.Print((First ? ("", First := false) : "`n") . Disp(x*))
+	Debug.Print(disp(x*))
 }
 
 t(x*) {
@@ -26,22 +26,23 @@ Class Debug {
 		class := this.__Class
 		%class% := this
 		
-		try
+		try {
 			Studio := ComObjActive("{DBD5A90A-A85C-11E4-B0C7-43449580656B}")
-		catch e
+			this.Pane := Studio.GetDebugPane()
+		} catch e
 			return this.StudioNotRunning()
 		
-		this.Pane := Studio.GetDebugPane()
 		
 		;this.Clear()
 		this.Show()
 	}
 	
 	Print(Print*) {
-		try 
-			this.Pane.Print(Debug.Printer(Print*))
-		catch e
-			this.StudioNotRunning()
+		s := Debug.Printer(Print*)
+		if (!this.Pane)
+			OutputDebug % s
+		else
+			this.Pane.Print(s "`n")
 	}
 	
 	Clear() {
@@ -57,6 +58,7 @@ Class Debug {
 	}
 	
 	StudioNotRunning() {
+		this.Pane := false
 		; runs if program runs and it couldn't connect to the studio output pane
 	}
 	
