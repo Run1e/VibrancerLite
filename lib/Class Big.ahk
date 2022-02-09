@@ -4,27 +4,24 @@
 	
 	; drag/drop
 	DropFiles(FileArray, CtrlHwnd, X, Y) {
-		
-		if (this.ActiveTab = 1) {
-			for Index, File in FileArray {
-				SplitPath, File,,, ext, FileName
-				if (ext = "exe")
-					GameRules[File] := {BlockAltTab:false, BlockWinKey:true, Vibrancy:50}, AddFile := File
-				else if (ext = "lnk") {
-					FileGetShortcut, % File, Target,,,, Icon
-					GameRules[Target] := {BlockAltTab:false, BlockWinKey:true, Vibrancy:50, Title: FileName}
-					if StrLen(Icon)
-						GameRules[Target].Icon := Icon
-					AddFile := Target
-				}
+		for Index, File in FileArray {
+			SplitPath, File,,, ext, FileName
+			if (ext = "exe")
+				GameRules[File] := {BlockAltTab:false, BlockWinKey:true, Vibrancy:50}, AddFile := File
+			else if (ext = "lnk") {
+				FileGetShortcut, % File, Target,,,, Icon
+				GameRules[Target] := {BlockAltTab:false, BlockWinKey:true, Vibrancy:50, Title: FileName}
+				if StrLen(Icon)
+					GameRules[Target].Icon := Icon
+				AddFile := Target
 			}
-			
-			if StrLen(AddFile) {
-				this.Activate()
-				this.UpdateGameList(AddFile)
-			} else
-				TrayTip("Only exe and lnk files are allowed!")
 		}
+		
+		if StrLen(AddFile) {
+			this.Activate()
+			this.UpdateGameList(AddFile)
+		} else
+			TrayTip("Only exe and lnk files are allowed!")
 	}
 	
 	; probably temporary (right?????)
@@ -250,11 +247,9 @@
 		this.GameLV.ModifyCol(2, 0)
 	}
 	
-	Open(tab := "") {
+	Open() {
 		if this.IsVisible { ; why redraw? lv_colors fix
 			this.LVRedraw(false)
-			if tab
-				this.SetTab(tab)
 			this.Activate()
 			this.LVRedraw(true)
 			return
@@ -262,6 +257,20 @@
 		
 		if SetGUI.IsVisible
 			return
+
+		for index, hwnd in this.MonitorHWND {
+			this.Control("Hide", hwnd)
+		}
+
+		for MonID, Mon in MonitorSetup(this.HALF_WIDTH - 16, 100, 4) {
+			HWND := this.Add("Text"
+					, "x" Big.HALF_WIDTH + 8 + Mon.X
+					. " y" 178 + Mon.Y
+					. " w" Mon.W
+					. " h" Mon.H
+					. " +Border 0x200 Center", MonID, this.SelectScreen.Bind(this, MonID))
+			this.MonitorHWND[MonID] := HWND
+		}
 		
 		this.LVRedraw(false)
 		
@@ -280,6 +289,9 @@
 			this.GameLV.CLV.Critical := 500
 			this.GameLV.CLV.SelectionColors(Settings.Color.Selection, "0xFFFFFF")
 		}
+
+		; redraw window controls
+
 	}
 	
 	LVRedraw(Redraw) {
